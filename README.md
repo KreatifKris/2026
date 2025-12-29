@@ -1,236 +1,336 @@
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown Menuju 2026 - Global</title>
+    <title>World Countdown 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS STYLING --- */
+        /* --- CSS STYLING & ANIMATION --- */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --completed-color: #4ade80;
+            --primary-color: #FFD700; /* Emas untuk highlight */
+            --bg-dark: #121212;
+            --text-light: #ffffff;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
             min-height: 100vh;
         }
 
-        h1 {
+        header {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-color);
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            background: linear-gradient(to right, #ffffff, var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleShine 3s infinite alternate;
         }
 
-        .city-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--accent-color);
+        /* Grid Container untuk kartu */
+        .world-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        .timezone-info {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-bottom: 20px;
+        /* Struktur Kartu Negara */
+        .country-card {
+            position: relative;
+            height: 300px; /* Tinggi tetap agar seragam */
+            border-radius: 20px;
+            overflow: hidden; /* Penting agar gambar tidak keluar batas saat di-zoom */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            background-color: #2a2a2a; /* Warna dasar loading */
         }
 
-        .timer {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            font-family: 'Courier New', Courier, monospace;
+        /* Layer Gambar Latar Belakang dengan Animasi */
+        .card-bg-image {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            /* Animasi Ken Burns (Slow Zoom & Pan) */
+            animation: kenBurnsEffect 25s infinite alternate ease-in-out;
         }
 
-        .time-unit {
+        /* Layer Overlay Gelap agar teks terbaca */
+        .card-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.3) 60%);
+            z-index: 1;
+        }
+
+        /* Konten Teks di atas gambar */
+        .card-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            justify-content: flex-end; /* Teks di bagian bawah */
+            padding: 25px;
+            box-sizing: border-box;
         }
 
-        .number {
-            font-size: 2rem;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
+        .location-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .timezone-sub {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        /* Styling Timer */
+        .timer-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-segment {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            padding: 8px 12px;
             border-radius: 8px;
-            min-width: 50px;
-            display: inline-block;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
         }
 
-        .label {
-            font-size: 0.7rem;
-            margin-top: 5px;
+        .time-num {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums; /* Agar lebar angka konsisten */
+        }
+
+        .time-label {
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            opacity: 0.8;
         }
 
-        .celebration {
-            display: none;
-            color: var(--completed-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-            animation: pulse 1s infinite;
+        /* Pesan Selamat Tahun Baru */
+        .celebration-msg {
+            display: none; /* Hidden by default */
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 900;
+            text-align: center;
+            animation: pulseText 1s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        /* --- KEYFRAME ANIMATIONS --- */
+        @keyframes kenBurnsEffect {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(-2%, 1%); }
+            100% { transform: scale(1.2) translate(1%, -2%); }
         }
 
-        footer {
-            margin-top: 50px;
-            font-size: 0.8rem;
-            color: #64748b;
+        @keyframes titleShine {
+            from { filter: brightness(100%); }
+            to { filter: brightness(130%); text-shadow: 0 0 20px var(--primary-color); }
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+
+        /* Responsif untuk layar kecil */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .world-grid { grid-template-columns: 1fr; }
+            .country-card { height: 250px; }
+            .time-num { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Countdown Menuju 2026 🎆</h1>
+    <header>
+        <h1>🌏 Menuju Tahun 2026</h1>
+    </header>
 
-    <div class="grid-container" id="countdown-grid">
-        </div>
-
-    <footer>
-        Dibuat secara otomatis dengan HTML, CSS & JS
-    </footer>
+    <main class="world-grid" id="grid-container">
+        </main>
 
     <script>
-        // --- KONFIGURASI KOTA & ZONA WAKTU ---
-        // Anda bisa menambah atau menghapus kota di sini
-        // Gunakan format IANA Timezone (contoh: 'Asia/Jakarta')
-        const locations = [
-            { city: 'Sydney', country: 'Australia', zone: 'Australia/Sydney' },
-            { city: 'Tokyo', country: 'Jepang', zone: 'Asia/Tokyo' },
-            { city: 'Jakarta', country: 'Indonesia (WIB)', zone: 'Asia/Jakarta' },
-            { city: 'Bali', country: 'Indonesia (WITA)', zone: 'Asia/Makassar' }, // Makassar mewakili WITA
-            { city: 'London', country: 'Inggris', zone: 'Europe/London' },
-            { city: 'New York', country: 'USA', zone: 'America/New_York' },
-            { city: 'Los Angeles', country: 'USA', zone: 'America/Los_Angeles' }
+        // --- KONFIGURASI DATA ---
+        // Saya menggunakan gambar dari Unsplash Source untuk kualitas tinggi.
+        // Setiap objek merepresentasikan satu lokasi.
+        const locationsData = [
+            {
+                city: "Jakarta",
+                country: "Indonesia (WIB)",
+                zone: "Asia/Jakarta",
+                // Gambar Monas/Jakarta
+                imgUrl: "https://images.unsplash.com/photo-1568226363616-6e4988582725?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "Bali",
+                country: "Indonesia (WITA)",
+                zone: "Asia/Makassar",
+                // Gambar Pura Ulun Danu Bratan
+                imgUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "Tokyo",
+                country: "Jepang",
+                zone: "Asia/Tokyo",
+                // Gambar Gunung Fuji & Pagoda Chureito
+                imgUrl: "https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "Sydney",
+                country: "Australia",
+                zone: "Australia/Sydney",
+                // Gambar Sydney Opera House
+                imgUrl: "https://images.unsplash.com/photo-1506973035872-a47069f6d711?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "Dubai",
+                country: "Uni Emirat Arab",
+                zone: "Asia/Dubai",
+                // Gambar Burj Khalifa
+                imgUrl: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "Paris",
+                country: "Prancis",
+                zone: "Europe/Paris",
+                // Gambar Menara Eiffel
+                imgUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "London",
+                country: "Inggris",
+                zone: "Europe/London",
+                // Gambar Big Ben
+                imgUrl: "https://images.unsplash.com/photo-1529655683826-aba9b3e77383?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                city: "New York",
+                country: "Amerika Serikat",
+                zone: "America/New_York",
+                // Gambar Patung Liberty / Skyline NYC
+                imgUrl: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop"
+            }
         ];
 
-        const targetYear = 2026;
+        const TARGET_YEAR = 2026;
+        const container = document.getElementById('grid-container');
 
-        function initCountdowns() {
-            const container = document.getElementById('countdown-grid');
-            
-            // Generate HTML untuk setiap lokasi
-            locations.forEach((loc, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="city-name">${loc.city}</div>
-                    <div class="timezone-info">${loc.country}</div>
-                    <div class="timer" id="timer-${index}">
-                        <div class="time-unit">
-                            <span class="number" id="d-${index}">00</span>
-                            <span class="label">Hari</span>
+        // --- FUNGSI INISIALISASI (Membuat HTML) ---
+        function createCards() {
+            locationsData.forEach((loc, index) => {
+                const cardHTML = `
+                    <div class="country-card">
+                        <div class="card-bg-image" style="background-image: url('${loc.imgUrl}')"></div>
+                        
+                        <div class="card-overlay"></div>
+                        
+                        <div class="card-content">
+                            <h2 class="location-title">${loc.city}, ${loc.country}</h2>
+                            <div class="timezone-sub">${loc.zone}</div>
+                            
+                            <div class="timer-box" id="timer-box-${index}">
+                                <div class="time-segment">
+                                    <span class="time-num" id="d-${index}">00</span>
+                                    <span class="time-label">Hari</span>
+                                </div>
+                                <div class="time-segment">
+                                    <span class="time-num" id="h-${index}">00</span>
+                                    <span class="time-label">Jam</span>
+                                </div>
+                                <div class="time-segment">
+                                    <span class="time-num" id="m-${index}">00</span>
+                                    <span class="time-label">Mnt</span>
+                                </div>
+                                <div class="time-segment">
+                                    <span class="time-num" id="s-${index}">00</span>
+                                    <span class="time-label">Dtk</span>
+                                </div>
+                            </div>
+                             <div class="celebration-msg" id="msg-${index}">
+                                🎉 HAPPY NEW YEAR 2026! 🎆
+                            </div>
                         </div>
-                        <div class="time-unit">
-                            <span class="number" id="h-${index}">00</span>
-                            <span class="label">Jam</span>
-                        </div>
-                        <div class="time-unit">
-                            <span class="number" id="m-${index}">00</span>
-                            <span class="label">Menit</span>
-                        </div>
-                        <div class="time-unit">
-                            <span class="number" id="s-${index}">00</span>
-                            <span class="label">Detik</span>
-                        </div>
-                    </div>
-                    <div class="celebration" id="msg-${index}">
-                        🎉 SELAMAT TAHUN BARU 2026! 🎉
                     </div>
                 `;
-                container.appendChild(card);
+                // Menambahkan string HTML ke container
+                container.insertAdjacentHTML('beforeend', cardHTML);
             });
         }
 
-        function updateTimers() {
+        // --- FUNGSI UPDATE TIMER (Logika Waktu) ---
+        function updateAllTimers() {
             const now = new Date();
 
-            locations.forEach((loc, index) => {
-                // 1. Dapatkan waktu saat ini di zona waktu target
-                // Kita mengonversi waktu 'now' ke string waktu lokal zona tersebut
-                const nowInZoneString = now.toLocaleString('en-US', { timeZone: loc.zone });
-                const nowInZone = new Date(nowInZoneString);
+            locationsData.forEach((loc, index) => {
+                // 1. Mendapatkan waktu saat ini di Zona Waktu target
+                // Trik: Ubah waktu browser ke string waktu lokal zona tersebut
+                const nowInTargetZoneStr = now.toLocaleString('en-US', { timeZone: loc.zone });
+                const nowInTargetZone = new Date(nowInTargetZoneStr);
 
-                // 2. Buat target waktu (1 Januari 2026, 00:00:00)
-                // Kita asumsikan targetnya adalah relatif terhadap waktu lokal zona tersebut
-                const targetDate = new Date(`January 1, ${targetYear} 00:00:00`);
+                // 2. Tentukan target waktu: 1 Januari 2026, 00:00:00 di zona tersebut
+                const targetDate = new Date(TARGET_YEAR, 0, 1, 0, 0, 0); // Bulan dimulai dari 0 (Jan = 0)
 
-                // 3. Hitung selisih
-                const diff = targetDate - nowInZone;
+                // 3. Hitung selisih (milidetik)
+                const diff = targetDate - nowInTargetZone;
 
-                const timerEl = document.getElementById(`timer-${index}`);
+                const timerBoxEl = document.getElementById(`timer-box-${index}`);
                 const msgEl = document.getElementById(`msg-${index}`);
 
                 if (diff <= 0) {
-                    // Jika waktu habis (sudah tahun baru di sana)
-                    timerEl.style.display = 'none';
-                    msgEl.style.display = 'block';
+                    // Waktu Habis / Sudah Tahun Baru
+                    if (timerBoxEl.style.display !== 'none') {
+                        timerBoxEl.style.display = 'none';
+                        msgEl.style.display = 'block';
+                    }
                 } else {
-                    // Kalkulasi waktu
+                    // Kalkulasi matematik standar
                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-                    // Update DOM
-                    document.getElementById(`d-${index}`).innerText = days;
-                    document.getElementById(`h-${index}`).innerText = hours < 10 ? '0' + hours : hours;
-                    document.getElementById(`m-${index}`).innerText = minutes < 10 ? '0' + minutes : minutes;
-                    document.getElementById(`s-${index}`).innerText = seconds < 10 ? '0' + seconds : seconds;
+                    // Update angka di HTML, tambahkan '0' di depan jika satuan
+                    document.getElementById(`d-${index}`).textContent = days;
+                    document.getElementById(`h-${index}`).textContent = String(hours).padStart(2, '0');
+                    document.getElementById(`m-${index}`).textContent = String(minutes).padStart(2, '0');
+                    document.getElementById(`s-${index}`).textContent = String(seconds).padStart(2, '0');
                 }
             });
         }
 
-        // Jalankan inisialisasi
-        initCountdowns();
-        
-        // Jalankan update pertama kali agar tidak ada delay 1 detik
-        updateTimers();
-
-        // Set interval update setiap 1 detik
-        setInterval(updateTimers, 1000);
-
+        // --- JALANKAN PROGRAM ---
+        createCards(); // Buat struktur HTML dulu
+        updateAllTimers(); // Jalankan sekali agar tidak delay saat loading
+        setInterval(updateAllTimers, 1000); // Update setiap detik
     </script>
 </body>
